@@ -215,12 +215,12 @@ class RobotPost(object):
             header_ins += '///ATTR SC,RW' + '\n'
 
         header_ins += '///GROUP1 RB1' + '\n'
-        header_ins += 'NOP'
+        header_ins += 'NOP\n'
         #if self.HAS_TURNTABLE:
         #    header = header + '/APPL' + '\n'
         
         self.PROG.insert(0, header_ins)
-        self.PROG.append('END')
+        self.PROG.append('END\n')
         
         self.PROG_TARGETS.insert(0, header)
         
@@ -340,7 +340,7 @@ class RobotPost(object):
         """Add a joint movement"""
         self.page_size_control() # Important to control the maximum lines per program and not save last target on new program
         target_id = self.add_target_joints(joints)
-        self.addline("MOVJ C%05d %s%s" % (target_id, self.STR_VJ, self.STR_PL))                    
+        self.addline("MOVJ C%05d %s%s\n" % (target_id, self.STR_VJ, self.STR_PL))                    
         self.LAST_POSE = pose
         
     def MoveL(self, pose, joints, conf_RLF=None):
@@ -357,7 +357,7 @@ class RobotPost(object):
         else:
             target_id = self.add_target_cartesian(self.POSE_FRAME*pose, joints, conf_RLF)
 
-        self.addline("MOVL C%05d %s%s" % (target_id, self.STR_V, self.STR_PL))        
+        self.addline("MOVL C%05d %s%s\n" % (target_id, self.STR_V, self.STR_PL))        
         self.LAST_POSE = pose
         
     def MoveC(self, pose1, joints1, pose2, joints2, conf_RLF_1=None, conf_RLF_2=None):
@@ -366,13 +366,13 @@ class RobotPost(object):
         
         if self.LAST_POSE is not None:
             target_id0 = self.add_target_cartesian(self.POSE_FRAME*self.LAST_POSE, joints1, conf_RLF_1)
-            self.addline("MOVC C%05d %s%s" % (target_id0, self.STR_V, self.STR_PL))
+            self.addline("MOVC C%05d %s%s\n" % (target_id0, self.STR_V, self.STR_PL))
         
         target_id1 = self.add_target_cartesian(self.POSE_FRAME*pose1, joints1, conf_RLF_1)
         target_id2 = self.add_target_cartesian(self.POSE_FRAME*pose2, joints2, conf_RLF_2)
             
-        self.addline("MOVC C%05d %s%s" % (target_id1, self.STR_V, self.STR_PL))
-        self.addline("MOVC C%05d %s%s" % (target_id2, self.STR_V, self.STR_PL))
+        self.addline("MOVC C%05d %s%s\n" % (target_id1, self.STR_V, self.STR_PL))
+        self.addline("MOVC C%05d %s%si\n" % (target_id2, self.STR_V, self.STR_PL))
         
         self.LAST_POSE = None
         
@@ -393,11 +393,11 @@ class RobotPost(object):
                 for m in range(3):
                     xyzwpr_pm = Pose_2_Motoman(pose*frame_calc[m])
                     for i in range(6):
-                        self.addline("SETE P%05d (%i) %i" % (self.SPARE_PR+m, i+1, round(xyzwpr_pm[i]*decimals[i])))
+                        self.addline("SETE P%05d (%i) %i\n" % (self.SPARE_PR+m, i+1, round(xyzwpr_pm[i]*decimals[i])))
                     for i in range(6,self.nAxes):
-                        self.addline("SETE P%05d (%i) %i" % (self.SPARE_PR+m, i+1, 0))
+                        self.addline("SETE P%05d (%i) %i\n" % (self.SPARE_PR+m, i+1, 0))
                     
-                self.addline("MFRAME UF#(%i) P%05d P%05d P%05d" % (self.ACTIVE_FRAME, self.SPARE_PR, self.SPARE_PR+1, self.SPARE_PR+2))
+                self.addline("MFRAME UF#(%i) P%05d P%05d P%05d\n" % (self.ACTIVE_FRAME, self.SPARE_PR, self.SPARE_PR+1, self.SPARE_PR+2))
                     
             else:
                 self.ACTIVE_FRAME = frame_id
@@ -415,11 +415,11 @@ class RobotPost(object):
                 self.RunMessage('Setting Tool %i (%s):' % (self.ACTIVE_TOOL, str(tool_name)), True)            
                 decimals = [1000,1000,1000,100,100,100]
                 for i in range(6):
-                    self.addline("SETE P%05d (%i) %i" % (self.SPARE_PR, i+1, round(xyzwpr[i]*decimals[i])))
+                    self.addline("SETE P%05d (%i) %i\n" % (self.SPARE_PR, i+1, round(xyzwpr[i]*decimals[i])))
                 for i in range(6,self.nAxes):
-                    self.addline("SETE P%05d (%i) %i" % (self.SPARE_PR, i+1, 0))
+                    self.addline("SETE P%05d (%i) %i\n" % (self.SPARE_PR, i+1, 0))
                     
-                self.addline("SETTOOL TL#(%i) P%05d" % (self.ACTIVE_TOOL, self.SPARE_PR))
+                self.addline("SETTOOL TL#(%i) P%05d\n" % (self.ACTIVE_TOOL, self.SPARE_PR))
                 
         else:
             self.ACTIVE_TOOL = tool_id
@@ -429,9 +429,9 @@ class RobotPost(object):
     def Pause(self, time_ms):
         """Pause the robot program"""
         if time_ms <= 0:
-            self.addline('PAUSE')
+            self.addline('PAUSE\n')
         else:
-            self.addline('TIMER T=%.2f' % (time_ms*0.001))
+            self.addline('TIMER T=%.2f\n' % (time_ms*0.001))
         
     def setSpeed(self, speed_mms):
         """Changes the robot speed (in mm/s)"""
@@ -477,7 +477,7 @@ class RobotPost(object):
         
         # at this point, io_var and io_value must be string values
         #DOUT OT#(2) ON
-        self.addline('DOUT %s %s' % (io_var, io_value))
+        self.addline('DOUT %s %s\n' % (io_var, io_value))
         
     def waitDI(self, io_var, io_value, timeout_ms=-1):
         """Waits for an input io_var to attain a given value io_value. Optionally, a timeout can be provided."""
@@ -492,10 +492,10 @@ class RobotPost(object):
         # at this point, io_var and io_value must be string values
         if timeout_ms <= 0:
             #WAIT IN#(12)=ON
-            self.addline('WAIT %s=%s' % (io_var, io_value))
+            self.addline('WAIT %s=%s\n' % (io_var, io_value))
         else:
             #self.LBL_ID_COUNT = self.LBL_ID_COUNT + 1
-            self.addline('WAIT %s=%s T=%.2f' % (io_var, io_value, timeout_ms*0.001))
+            self.addline('WAIT %s=%s T=%.2f\n' % (io_var, io_value, timeout_ms*0.001))
        
             
     def RunCode(self, code, is_function_call = False):
@@ -507,23 +507,23 @@ class RobotPost(object):
                 
             # default program call
             code.replace(' ','_')
-            self.addline('CALL JOB:%s' % (code))
+            self.addline('CALL JOB:%s\n' % (code))
         else:
             #if code.endswith(';'):
                 #code = code[:-1]
-            self.addline(code)
+            self.addline(code + '\n')
         
     def RunMessage(self, message, iscomment = False):
         """Add a message/comment"""
         if iscomment:
             for i in range(0,len(message), 29):
                 i2 = min(i + 29, len(message))
-                self.addline("'%s" % message[i:i2])
+                self.addline("'%s\n" % message[i:i2])
                 
         else:
             for i in range(0,len(message), 25):
                 i2 = min(i + 25, len(message))
-                self.addline('MSG "%s"' % message[i:i2])
+                self.addline('MSG "%s"\n' % message[i:i2])
 
 # ------------------ Motoman specifics ------------------
     def Macro(self, number, mf, args):
@@ -537,19 +537,19 @@ class RobotPost(object):
             # Only ARGF are supported
             macro_line += (' ARGF%s' % (arg))
 
-        self.addline(macro_line)
+        self.addline(macro_line + '\n')
 
     def Arcon(self, asf_number = 0):
         if asf_number is 0:
-            self.addline('ARCON')
+            self.addline('ARCON\n')
         else:
-            self.addline('ARCON ASF#(%s)' % asf_number)
+            self.addline('ARCON ASF#(%s)\n' % asf_number)
 
     def Arcof(self, aef_number = 0):
         if aef_number is 0:
-            self.addline('ARCOF')
+            self.addline('ARCOF\n')
         else:
-            self.addline('ARCOF AEF#(%s)' % aef_number)
+            self.addline('ARCOF AEF#(%s)\n' % aef_number)
  
 # ------------------ private ----------------------
     def page_size_control(self):
@@ -582,26 +582,26 @@ class RobotPost(object):
     def setCartesian(self, confdata):
         #self.LAST_CONFDATA = [none/pulses(0)/postype(1), base, tool, config]
         if self.ACTIVE_FRAME is not None and self.ACTIVE_FRAME != self.LAST_CONFDATA[1]:
-            self.addline_targets("///USER %i" % self.ACTIVE_FRAME)
+            self.addline_targets("///USER %i\n" % self.ACTIVE_FRAME)
             self.LAST_CONFDATA[1] = self.ACTIVE_FRAME        
 
         if self.ACTIVE_TOOL != self.LAST_CONFDATA[2]:
-            self.addline_targets("///TOOL %i" % self.ACTIVE_TOOL)
+            self.addline_targets("///TOOL %i\n" % self.ACTIVE_TOOL)
             self.LAST_CONFDATA[2] = self.ACTIVE_TOOL
 
         if self.LAST_CONFDATA[0] != 2:
             if self.ACTIVE_FRAME is not None:
-                self.addline_targets("///POSTYPE USER")
+                self.addline_targets("///POSTYPE USER\n")
             else:
-                self.addline_targets("///POSTYPE BASE")
+                self.addline_targets("///POSTYPE BASE\n")
 
-            self.addline_targets("///RECTAN")
-            self.addline_targets("///RCONF %s" % confdata)
+            self.addline_targets("///RECTAN\n")
+            self.addline_targets("///RCONF %s\n" % confdata)
             self.LAST_CONFDATA[3] = confdata
             
             
         elif self.LAST_CONFDATA[3] != confdata:
-            self.addline_targets("///RCONF %s" % confdata)
+            self.addline_targets("///RCONF %s\n" % confdata)
             self.LAST_CONFDATA[3] = confdata
 
         self.LAST_CONFDATA[0] = 2
@@ -609,12 +609,12 @@ class RobotPost(object):
     def setPulses(self):
         #self.LAST_CONFDATA = [none/pulses(0)/postype(1), base, tool, config]
         if self.LAST_CONFDATA[0] is None:
-            self.addline_targets("///TOOL %i" % self.ACTIVE_TOOL)
+            self.addline_targets("///TOOL %i\n" % self.ACTIVE_TOOL)
             self.LAST_CONFDATA[2] = self.ACTIVE_TOOL
        
         if self.LAST_CONFDATA[0] != 1:
-            self.addline_targets("///POSTYPE PULSE")
-            self.addline_targets("///PULSE")
+            self.addline_targets("///POSTYPE PULSE\n")
+            self.addline_targets("///PULSE\n")
             self.LAST_CONFDATA[0] = 1
             
         self.LAST_CONFDATA[0] = 1
@@ -634,7 +634,7 @@ class RobotPost(object):
         for i in range(len(joints)):
             str_pulses.append('%i' % round(joints[i] * self.PULSES_X_DEG[i]))
         
-        self.addline_targets('C%05i=' % cid + ','.join(str_pulses))         
+        self.addline_targets('C%05i=' % cid + ','.join(str_pulses) + '\n')         
         return cid
     
     def add_target_cartesian(self, pose, joints, conf_RLF):           
@@ -660,7 +660,7 @@ class RobotPost(object):
         self.setCartesian(confdata)            
         cid = self.C_COUNT
         self.C_COUNT = self.C_COUNT + 1        
-        self.addline_targets('C%05i=' % cid + '%.3f,%.3f,%.3f,%.2f,%.2f,%.2f' % tuple(xyzwpr))
+        self.addline_targets('C%05i=' % cid + '%.3f,%.3f,%.3f,%.2f,%.2f,%.2f' % tuple(xyzwpr) + '\n')
         return cid
     
 #/JOB
