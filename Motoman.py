@@ -99,7 +99,8 @@ class RobotPost(object):
     PROG_FILES = [] # List of Program files to be uploaded through FTP
     
     PROG_NAMES = [] # List of PROG NAMES
-    PROG_LIST = [] # List of PROG 
+    PROG_LIST = [] # List of PROG
+    FOLDERNAME = '' # Folder inside the robot 
     
     PROG_NAME = 'unknown'  # Original name of the current program (example: ProgA)
     PROG_NAME_CURRENT = 'unknown' # Auto generated name (different from PROG_NAME if we have more than 1 page per program. Example: ProgA2)
@@ -181,6 +182,12 @@ class RobotPost(object):
             
         self.PROG_NAME_CURRENT = progname_i
         self.PROG_NAMES.append(progname_i)
+
+    def SetFolder(self, foldername):
+        if len(foldername) is not 0:
+            self.FOLDERNAME = get_safe_name(foldername)
+        else:
+            self.FOLDERNAME = ''
         
     def ProgFinish(self, progname, new_page = False):
         progname = get_safe_name(progname)
@@ -194,6 +201,8 @@ class RobotPost(object):
         header = ''
         header += '/JOB' + '\n'
         header += '//NAME %s' % progname + '\n'
+        if len(self.FOLDERNAME) is not 0:
+            header += '///FOLDERNAME %s' % self.FOLDERNAME + '\n'
         header += '//POS' + '\n'
         header += '///NPOS %i,0,0,%i,0,0' % (self.C_COUNT, self.P_COUNT)
         
