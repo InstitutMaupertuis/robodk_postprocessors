@@ -443,9 +443,7 @@ class RobotPost(object):
             self.addline('TIMER T=%.2f' % (time_ms*0.001))
         
     def setSpeed(self, speed_mms):
-        """Changes the robot speed (in mm/s)"""
-        speed_cm_min = speed_mms * 60.0 / 10.0
-        speedl = max(0.01,min(speed_cm_min,200.0)) # Important! Filter linear speed is in mm/s or cm/min (otherwise the program stops)
+        speedl = max(1, speed_mms)
         self.STR_V = "V=%.1f" % speedl
     
     def setAcceleration(self, accel_mmss):
